@@ -8,6 +8,18 @@ import plotly.graph_objects as go
 
 # Set page config
 st.set_page_config(page_title="Coffee Sales Analysis")
+with open("styles.css") as css:
+    st.markdown(f"<style>{css.read()}</style>", unsafe_allow_html=True)
+    st.markdown(
+        """
+        <style>
+        [data-testid=stSidebar] {
+            border-right: 1px solid #39393B !important;}
+        }
+        </style>
+        """,
+        unsafe_allow_html=True,
+    )
 
 
 # Load data
@@ -30,6 +42,19 @@ def load_data():
     ]
     df["day_name"] = pd.Categorical(df["day_name"], categories=days_order, ordered=True)
     return df
+
+
+color_palette = px.colors.qualitative.Light24
+
+
+def colorize_multiselect_options(colors: list[str]) -> None:
+    rules = ""
+    n_colors = len(colors)
+
+    for i, color in enumerate(colors):
+        rules += f""".stMultiSelect div[data-baseweb="select"] span[data-baseweb="tag"]:nth-child({n_colors}n+{i + 1}){{background-color: {color};}}"""
+
+    st.markdown(f"<style>{rules}</style>", unsafe_allow_html=True)
 
 
 df = load_data()
@@ -72,8 +97,11 @@ if page == "Overview":
     st.write("### First 10 Rows of Data")
     st.write(df.head(10))
 
+
 elif page == "Sales Analysis":
     st.write("## Sales Analysis")
+
+    st.divider()
 
     # Total Sales by Coffee
     st.write("### Total Sales by Coffee")
@@ -84,7 +112,15 @@ elif page == "Sales Analysis":
         x=total_sales_by_coffee.index,
         y=total_sales_by_coffee.values,
         labels={"x": "Coffee Name", "y": "Total Sales"},
+        color=total_sales_by_coffee.index,
+        color_discrete_sequence=color_palette,
     )
+
+    fig.update_layout(
+        xaxis={"categoryorder": "total ascending"},
+        showlegend=False,
+    )
+
     st.plotly_chart(fig)
 
     st.write("### Overview")
@@ -110,6 +146,8 @@ elif page == "Sales Analysis":
         df["coffee_name"].value_counts().reindex(total_sales_by_coffee.index)
     )
 
+    colors = px.colors.qualitative.Light24
+
     fig = go.Figure()
 
     # Add the line plot
@@ -119,19 +157,21 @@ elif page == "Sales Analysis":
             y=sorted_count_sale.values,
             mode="lines+markers",
             name="Number of Sales",
-            line=dict(color="orange"),
-            marker=dict(size=8),
+            line=dict(color=colors[0], width=3),
+            marker=dict(
+                size=10, color=colors, line=dict(width=2, color="DarkSlateGrey")
+            ),
         )
     )
 
     # Update layout
     fig.update_layout(
+        title="Number of Sales by Coffee",
         xaxis_title="Coffee Name",
         yaxis_title="Number of Sales",
         hovermode="x unified",
         xaxis=dict(tickangle=45),
     )
-
     # Make the chart responsive
     fig.update_layout(
         autosize=True,
@@ -141,6 +181,7 @@ elif page == "Sales Analysis":
 
     # Display the chart
     st.plotly_chart(fig, use_container_width=True)
+
     st.write("### Overview")
     st.write(
         "The line chart titled 'Number of Sales by Coffee' provides a visual representation of the sales volume for each coffee type within the vending machine. It allows us to compare the popularity of different coffee products and identify any trends or patterns in sales."
@@ -156,7 +197,8 @@ elif page == "Sales Analysis":
 
     st.divider()
 
-    # Coffee selection
+    colorize_multiselect_options(colors)
+
     selected_coffee = st.multiselect(
         "Select Coffee Types",
         df["coffee_name"].unique(),
@@ -172,20 +214,25 @@ elif page == "Sales Analysis":
         .unstack()
         .fillna(0)
     )
-    fig, ax = plt.subplots(figsize=(12, 8))
-    sns.heatmap(
+
+    # Create heatmap using Plotly Express
+    fig = px.imshow(
         sale_by_coffee_perday,
-        cmap="coolwarm",
-        annot=True,
-        fmt=".0f",
-        cbar_kws={"label": "Number of Sales"},
-        ax=ax,
+        text_auto=".0f",
+        color_continuous_scale="bluered",
+        aspect="auto",
     )
-    ax.set_title("Sales Count by Coffee per Day")
-    ax.set_xlabel("Coffee Name")
-    ax.set_xticklabels(ax.get_xticklabels(), rotation=40)
-    ax.set_ylabel("Day of the Week")
-    st.pyplot(fig)
+    fig.update_layout(
+        title="Sales Count by Coffee per Day",
+        xaxis_title="Coffee Name",
+        yaxis_title="Day of the Week",
+    )
+
+    # Rotate x-axis labels
+    fig.update_xaxes(tickangle=40)
+
+    # Display in Streamlit
+    st.plotly_chart(fig)
 
     st.write("### Overview")
     st.write(
@@ -211,6 +258,7 @@ elif page == "Sales Analysis":
             x="day_name",
             y="money",
             color="day_name",
+            color_discrete_sequence=px.colors.qualitative.Light24,
         )
         st.plotly_chart(fig)
         st.markdown("""
@@ -231,6 +279,7 @@ elif page == "Sales Analysis":
             x="month_name",
             y="money",
             color="month_name",
+            color_discrete_sequence=px.colors.qualitative.Light24,
         )
         st.plotly_chart(fig)
         st.markdown("""
@@ -253,6 +302,7 @@ elif page == "Sales Analysis":
             x="month",
             y="money",
             color="coffee_name",
+            color_discrete_sequence=px.colors.qualitative.Light24,
         )
         st.plotly_chart(fig)
         st.markdown("""
@@ -277,6 +327,7 @@ elif page == "Payment Analysis":
     fig = px.pie(
         values=total_sales_by_payment.values,
         names=total_sales_by_payment.index,
+        color_discrete_sequence=px.colors.qualitative.Light24,
     )
     fig.update_traces(textposition="inside", textinfo="percent+label")
     st.plotly_chart(fig)
@@ -287,19 +338,24 @@ elif page == "Payment Analysis":
     fig = px.pie(
         values=number_of_sales_by_payment.values,
         names=number_of_sales_by_payment.index,
+        color_discrete_sequence=px.colors.qualitative.Light24,
     )
     fig.update_traces(textposition="inside", textinfo="percent+label")
     st.plotly_chart(fig)
 
     st.write("### Distribution of Cash Type")
-    cash_type_distribution = df["cash_type"].value_counts().sort_values(ascending=True)
-    fig = px.bar(
-        x=cash_type_distribution.values,
-        y=cash_type_distribution.index,
-        orientation="h",
-        labels={"x": "Count", "y": "Cash Type"},
+    cash_type_distribution = (
+        df["cash_type"].value_counts().sort_values(ascending=True).reset_index()
     )
-    fig.update_traces(texttemplate="%{x}", textposition="outside")
+    cash_type_distribution.columns = ["cash_type", "count"]
+    fig = px.bar(
+        cash_type_distribution,
+        x="cash_type",
+        y="count",
+        color="cash_type",
+        color_discrete_map={"cash": "#00FE35", "card": "#FD3216"},
+    )
+    fig.update_traces(texttemplate="%{y}", textposition="outside")
     fig.update_layout(yaxis={"categoryorder": "total ascending"})
     st.plotly_chart(fig, use_container_width=True)
 
