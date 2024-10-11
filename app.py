@@ -5,13 +5,17 @@ import seaborn as sns
 import streamlit as st
 
 
-df = pd.read_csv('index.csv')
+df = pd.read_csv("index.csv")
 
 st.title("Midterm Activity: Streamlit Data Exploration App")
 st.divider()
 
-st.write("This dataset contains records of coffee sales transactions from a vending machine. This includes information about each sale, the type of coffee purchased, mode of payment, the time of transaction, and other relevant details. This dataset aims to provide valuable data for the community to explore. The dataset spans from March to September 2024")
-st.write("The main purpose of this dataset is to help analyze customer purchasing habits, track sales trends, and discover customer’s preferences for different coffee products. This dataset helps us gain insights such as peak sales periods, and which coffee types are most popular.")
+st.write(
+    "This dataset contains records of coffee sales transactions from a vending machine. This includes information about each sale, the type of coffee purchased, mode of payment, the time of transaction, and other relevant details. This dataset aims to provide valuable data for the community to explore. The dataset spans from March to September 2024"
+)
+st.write(
+    "The main purpose of this dataset is to help analyze customer purchasing habits, track sales trends, and discover customer’s preferences for different coffee products. This dataset helps us gain insights such as peak sales periods, and which coffee types are most popular."
+)
 st.divider()
 st.write("### Data Types:")
 st.write(df.dtypes)
@@ -30,8 +34,6 @@ if not numeric_df.empty:
     range_values = max_values - min_values
     percentiles = numeric_df.quantile([0.25, 0.5, 0.75])
 
-
-
     st.write("### Statistics Summary:")
     st.write(f"**Mean:**\n{mean}")
     st.write(f"**Median:**\n{median}")
@@ -44,22 +46,30 @@ if not numeric_df.empty:
     st.write(f"**Percentiles:**\n{percentiles}")
 
 st.divider()
-df['datetime'] = pd.to_datetime(df['datetime'], errors='coerce')
-df['hour'] = df['datetime'].dt.hour
-df['day'] = df['datetime'].dt.day
-df['month'] = df['datetime'].dt.month
-df['day_name'] = df['datetime'].dt.day_name()
-days_order = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday']
-df['day_name'] = pd.Categorical(df['day_name'], categories=days_order, ordered=True)
+df["datetime"] = pd.to_datetime(df["datetime"], errors="coerce")
+df["hour"] = df["datetime"].dt.hour
+df["day"] = df["datetime"].dt.day
+df["month"] = df["datetime"].dt.month
+df["day_name"] = df["datetime"].dt.day_name()
+days_order = [
+    "Monday",
+    "Tuesday",
+    "Wednesday",
+    "Thursday",
+    "Friday",
+    "Saturday",
+    "Sunday",
+]
+df["day_name"] = pd.Categorical(df["day_name"], categories=days_order, ordered=True)
 
 
 st.write("### First 10 Rows of Data")
 st.write(df.head(10))
 st.divider()
 
-coffee_names = df['coffee_name'].unique()
-total_sale_by_coffee = df.groupby('coffee_name')['money'].sum()
-count_sale_by_coffee = df.groupby('coffee_name')['money'].count()
+coffee_names = df["coffee_name"].unique()
+total_sale_by_coffee = df.groupby("coffee_name")["money"].sum()
+count_sale_by_coffee = df.groupby("coffee_name")["money"].count()
 
 sorted_total_sale = total_sale_by_coffee.sort_values()
 sorted_count_sale = count_sale_by_coffee.loc[sorted_total_sale.index]
@@ -69,17 +79,25 @@ st.write("# Visualization")
 st.write("### Total Sales by Coffee")
 # Total Sales by Coffee Bar graph
 fig, ax1 = plt.subplots(figsize=(12, 8))
-color = 'tab:blue'
-ax1.set_xlabel('Coffee Name')
-ax1.set_ylabel('Total Sales')
-ax1.bar(sorted_total_sale.index, sorted_total_sale, color=color, alpha=0.6, label='Total Sales')
-ax1.tick_params(axis='y', labelcolor=color)
-plt.title('Total Sales by Coffee')
-ax1.legend(loc='upper left')
+color = "tab:blue"
+ax1.set_xlabel("Coffee Name")
+ax1.set_ylabel("Total Sales")
+ax1.bar(
+    sorted_total_sale.index,
+    sorted_total_sale,
+    color=color,
+    alpha=0.6,
+    label="Total Sales",
+)
+ax1.tick_params(axis="y", labelcolor=color)
+plt.title("Total Sales by Coffee")
+ax1.legend(loc="upper left")
 st.pyplot(fig)
 
 st.write("### Overview")
-st.write("The bar chart titled Total Sales by Coffee' provides a visual representation of the popularity and sales performance of various coffee types within the vending machine. It allows us to quickly identify the best-selling coffee products and understand customer preferences.")
+st.write(
+    "The bar chart titled Total Sales by Coffee' provides a visual representation of the popularity and sales performance of various coffee types within the vending machine. It allows us to quickly identify the best-selling coffee products and understand customer preferences."
+)
 
 st.write("    ")
 st.write("### Insights")
@@ -96,16 +114,24 @@ st.divider()
 st.write("### Number of Sales by Coffee")
 fig, ax1 = plt.subplots(figsize=(12, 8))
 ax2 = ax1.twinx()
-color = 'tab:orange'
-ax2.set_ylabel('Number of Sales', color=color)
-ax2.plot(sorted_count_sale.index, sorted_count_sale, color=color, marker='o', label='Number of Sales')
-ax2.tick_params(axis='y', labelcolor=color)
-plt.title('Number of Sales by Coffee')
-ax2.legend(loc='upper left')
+color = "tab:orange"
+ax2.set_ylabel("Number of Sales", color=color)
+ax2.plot(
+    sorted_count_sale.index,
+    sorted_count_sale,
+    color=color,
+    marker="o",
+    label="Number of Sales",
+)
+ax2.tick_params(axis="y", labelcolor=color)
+plt.title("Number of Sales by Coffee")
+ax2.legend(loc="upper left")
 st.pyplot(fig)
 
 st.write("### Overview")
-st.write("The line chart titled 'Number of Sales by Coffee' provides a visual representation of the sales volume for each coffee type within the vending machine. It allows us to compare the popularity of different coffee products and identify any trends or patterns in sales.")
+st.write(
+    "The line chart titled 'Number of Sales by Coffee' provides a visual representation of the sales volume for each coffee type within the vending machine. It allows us to compare the popularity of different coffee products and identify any trends or patterns in sales."
+)
 st.write("    ")
 
 st.write("### Insights")
@@ -119,14 +145,23 @@ st.divider()
 
 # Sales Count by Coffee per Day HEATMAP
 st.write("### Sales Count by Coffee per Day")
-sale_by_coffee_perday = df.groupby(['day_name', 'coffee_name'])['money'].count().unstack().fillna(0)
+sale_by_coffee_perday = (
+    df.groupby(["day_name", "coffee_name"])["money"].count().unstack().fillna(0)
+)
 fig, ax = plt.subplots(figsize=(12, 8))
-sns.heatmap(sale_by_coffee_perday, cmap='coolwarm', annot=True, fmt='.0f', cbar_kws={'label': 'Number of Sales'}, ax=ax)
-ax.set_title('Sales Count by Coffee per Day')
-ax.set_xlabel('Coffee Name')
+sns.heatmap(
+    sale_by_coffee_perday,
+    cmap="coolwarm",
+    annot=True,
+    fmt=".0f",
+    cbar_kws={"label": "Number of Sales"},
+    ax=ax,
+)
+ax.set_title("Sales Count by Coffee per Day")
+ax.set_xlabel("Coffee Name")
 ax.set_xticklabels(ax.get_xticklabels(), rotation=40)
-ax.set_ylabel('Day of the Week')
-st.pyplot(fig)  
+ax.set_ylabel("Day of the Week")
+st.pyplot(fig)
 
 st.markdown("""
 ### Overview
@@ -139,27 +174,45 @@ The heatmap provides a visual representation of the number of sales for each cof
 
 st.divider()
 
+
 # Total Sales by Weekday
 def plot_sales_by_weekday():
-    plt.figure(figsize=(8,6))
-    ax = sns.barplot(data=df, x='day_name', y='money', estimator=sum, errorbar=None, 
-                     order=['Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sunday'], 
-                     palette="Set2")
+    plt.figure(figsize=(8, 6))
+    ax = sns.barplot(
+        data=df,
+        x="day_name",
+        y="money",
+        estimator=sum,
+        errorbar=None,
+        order=[
+            "Monday",
+            "Tuesday",
+            "Wednesday",
+            "Thursday",
+            "Friday",
+            "Saturday",
+            "Sunday",
+        ],
+        palette="Set2",
+    )
 
-    
     for p in ax.patches:
-        ax.annotate(format(p.get_height(), '.0f'), 
-                    (p.get_x() + p.get_width() / 2., p.get_height()), 
-                    ha='center', va='center', xytext=(0, 10), textcoords='offset points')
+        ax.annotate(
+            format(p.get_height(), ".0f"),
+            (p.get_x() + p.get_width() / 2.0, p.get_height()),
+            ha="center",
+            va="center",
+            xytext=(0, 10),
+            textcoords="offset points",
+        )
 
-    
     plt.yticks(range(0, 6001, 1000))
     plt.title("Total Sales by Weekday")
-    plt.xlabel('Weekday')
+    plt.xlabel("Weekday")
     plt.ylabel("Total Sales")
 
     plt.tight_layout()
-    st.pyplot(plt) 
+    st.pyplot(plt)
 
 
 st.write("### Total Sales by Weekday")
@@ -182,27 +235,44 @@ st.divider()
 
 # Total Sales by month
 month_mapping = {
-    1: "January", 2: "February", 3: "March", 4: "April",
-    5: "May", 6: "June", 7: "July", 8: "August",
-    9: "September", 10: "October", 11: "November", 12: "December"
+    1: "January",
+    2: "February",
+    3: "March",
+    4: "April",
+    5: "May",
+    6: "June",
+    7: "July",
+    8: "August",
+    9: "September",
+    10: "October",
+    11: "November",
+    12: "December",
 }
 
 
-df['month_name'] = df['month'].map(month_mapping)
+df["month_name"] = df["month"].map(month_mapping)
 
 st.write("### Total Sales by Month")
 plt.figure(figsize=(12, 8))
-ax = sns.barplot(data=df, x='month_name', y='money', estimator=sum, errorbar=None, palette="Set2")
+ax = sns.barplot(
+    data=df, x="month_name", y="money", estimator=sum, errorbar=None, palette="Set2"
+)
 
 for p in ax.patches:
-    ax.annotate(format(p.get_height(), '.0f'), (p.get_x() + p.get_width() / 2., p.get_height()), 
-                ha='center', va='center', xytext=(0, 10), textcoords='offset points')
+    ax.annotate(
+        format(p.get_height(), ".0f"),
+        (p.get_x() + p.get_width() / 2.0, p.get_height()),
+        ha="center",
+        va="center",
+        xytext=(0, 10),
+        textcoords="offset points",
+    )
 
 plt.yticks(range(0, 10001, 1000))
 plt.title("Total Sales by Month")
-plt.xlabel('Months')
+plt.xlabel("Months")
 plt.ylabel("Total Sales")
-plt.xticks(rotation=0) 
+plt.xticks(rotation=0)
 plt.tight_layout()
 
 st.pyplot(plt)
@@ -221,23 +291,28 @@ The bar chart titled *"Total Sales by Month"* provides a visual representation o
 
 st.divider()
 
-monthly_coffee_sales = df.groupby(['month', 'coffee_name'])['money'].sum().reset_index()
+monthly_coffee_sales = df.groupby(["month", "coffee_name"])["money"].sum().reset_index()
 
 
-monthly_coffee_sales['month_name'] = monthly_coffee_sales['month'].map(month_mapping)
+monthly_coffee_sales["month_name"] = monthly_coffee_sales["month"].map(month_mapping)
 
 
-idx = monthly_coffee_sales.groupby(['month'])['money'].transform(max) == monthly_coffee_sales['money']
+idx = (
+    monthly_coffee_sales.groupby(["month"])["money"].transform(max)
+    == monthly_coffee_sales["money"]
+)
 preferred_coffee_each_month = monthly_coffee_sales[idx]
 
 st.write("### Preferred Coffee Each Month")
 plt.figure(figsize=(7, 3))
-sns.barplot(data=preferred_coffee_each_month, x='month_name', y='money', hue='coffee_name')
-plt.title('Preferred Coffee Type Each Month')
-plt.xlabel('Month')
-plt.ylabel('Total Sales')
+sns.barplot(
+    data=preferred_coffee_each_month, x="month_name", y="money", hue="coffee_name"
+)
+plt.title("Preferred Coffee Type Each Month")
+plt.xlabel("Month")
+plt.ylabel("Total Sales")
 plt.xticks(rotation=45)
-plt.legend(title='Coffee Type', bbox_to_anchor=(1.05, 1), loc='upper left')
+plt.legend(title="Coffee Type", bbox_to_anchor=(1.05, 1), loc="upper left")
 plt.tight_layout()
 
 st.pyplot(plt)
@@ -255,31 +330,42 @@ The bar chart titled "Preferred Coffee Type Each Month" provides a visual repres
 """)
 
 
-
 st.divider()
 
 # Payment Type
-st.write("### Paymnet Type")
-payment_type = df['cash_type'].unique()
-total_sale_by_payment = df.groupby('cash_type')['money'].sum()
-count_sale_by_payment = df.groupby('cash_type')['money'].count()
+st.write("### Payment Type")
+payment_type = df["cash_type"].unique()
+total_sale_by_payment = df.groupby("cash_type")["money"].sum()
+count_sale_by_payment = df.groupby("cash_type")["money"].count()
 
 fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(12, 6))
 
-ax1.pie(total_sale_by_payment, labels=total_sale_by_payment.index, autopct='%1.1f%%', startangle=140, colors=['limegreen', 'pink'])
-ax1.set_title('Total Sales by Payment Type')
+ax1.pie(
+    total_sale_by_payment,
+    labels=total_sale_by_payment.index,
+    autopct="%1.1f%%",
+    startangle=140,
+    colors=["limegreen", "pink"],
+)
+ax1.set_title("Total Sales by Payment Type")
 
 
-ax2.pie(count_sale_by_payment, labels=count_sale_by_payment.index, autopct='%1.1f%%', startangle=140, colors=['limegreen', 'pink'])
-ax2.set_title('Number of Sales by Payment Type')
+ax2.pie(
+    count_sale_by_payment,
+    labels=count_sale_by_payment.index,
+    autopct="%1.1f%%",
+    startangle=140,
+    colors=["limegreen", "pink"],
+)
+ax2.set_title("Number of Sales by Payment Type")
 
 st.pyplot(fig)
 
 plt.figure()
-df['cash_type'].hist()
-plt.title('Distribution of Cash Type')
-plt.xlabel('Cash Type')
-plt.ylabel('Frequency')
+df["cash_type"].hist()
+plt.title("Distribution of Cash Type")
+plt.xlabel("Cash Type")
+plt.ylabel("Frequency")
 
 st.pyplot(plt)
 
@@ -300,5 +386,10 @@ These charts provide insights into the payment methods used by customers and the
 st.divider()
 
 st.write("# Conclusion")
-st.write("The analysis of coffee sales reveals a significant insights on customer behavior and their preferences. “Latte” consistently emerges as the top-selling coffee, showing a strong demand for this beverage throughout the year.")
-st.write("These insights imply that coffee businesses should prioritize stocking coffees like “Latte”, followed by “Americano with Milk”, and “Cappuccino”. Further analysis could investigate the impact of marketing strategies on sales and explore customer preferences of coffee types.")
+st.write(
+    "The analysis of coffee sales reveals a significant insights on customer behavior and their preferences. “Latte” consistently emerges as the top-selling coffee, showing a strong demand for this beverage throughout the year."
+)
+st.write(
+    "These insights imply that coffee businesses should prioritize stocking coffees like “Latte”, followed by “Americano with Milk”, and “Cappuccino”. Further analysis could investigate the impact of marketing strategies on sales and explore customer preferences of coffee types."
+)
+
